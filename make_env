@@ -1,0 +1,3 @@
+VOLUMES = -v /mnt/d/dev/code/OrgDoc:/src
+PORTS = -p 1313:1313
+PORT = 1313
