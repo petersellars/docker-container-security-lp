@@ -15,7 +15,7 @@ clean:
 
 analyze: Dockerfile
 	@echo "Analyzing Dockerfile using Hadolint..."
-	@docker run --rm -i hadolint/hadolint < Dockerfile
+	@docker run --rm -i hadolint/hadolint hadolint --ignore DL3018 - < Dockerfile
 
 build: analyze
 	@echo "Building Hugo Builder container..."
@@ -25,7 +25,7 @@ build: analyze
 
 build-site: build
 	@echo "Build OrgDoc Site..."
-	@docker run --rm --name $(CONTAINER_NAME)-$(CONTAINER_INSTANCE) -it $(PORTS) $(VOLUMES) $(ENV) $(NS)/$(IMAGE_NAME):$(VERSION) hugo
+	@docker run --rm --name $(CONTAINER_NAME)-$(CONTAINER_INSTANCE) -it $(PORTS) $(VOLUMES) $(ENV) -u hugo $(NS)/$(IMAGE_NAME):$(VERSION) hugo
 
 start: build-site
 	@echo "Serving OrgDoc Site..."
@@ -35,6 +35,10 @@ stop:
 	@echo "Stop serving OrgDoc Site..."
 	@docker stop $(CONTAINER_NAME)-$(CONTAINER_INSTANCE)
 
+check-health:
+	@echo "Checking the health of the Hugo Server..."
+	@docker inspect --format='{{json .State.Health}}' $(CONTAINER_NAME)-$(CONTAINER_INSTANCE)
+
 push:
 	@echo "Pushing docker image to Docker registry..."
 	@docker push $(NS)/$(IMAGE_NAME):$(VERSION)
@@ -42,4 +46,4 @@ push:
 release: build
 	@make push -e VERSION=$(VERSION)
 
-.PHONY: clean analyze build build-site start stop push release
+.PHONY: clean analyze build build-site start stop check-health push release

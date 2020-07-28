@@ -2,7 +2,6 @@ FROM alpine:3.12
 
 LABEL maintainer="apurohit@enoviti.com"
 
-# hadolint ignore=DL3018
 RUN apk add --no-cache \
     curl \
     git \
@@ -10,7 +9,6 @@ RUN apk add --no-cache \
     rsync
 
 ENV VERSION 0.64.0
-RUN mkdir -p /usr/local/src 
 WORKDIR  /usr/local/src 
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # Install Hugo
@@ -19,14 +17,11 @@ RUN curl -L -o hugo_${VERSION}_Linux-64bit.tar.gz https://github.com/gohugoio/hu
     && tar -xf hugo_${VERSION}_Linux-64bit.tar.gz \
     && rm hugo_${VERSION}_Linux-64bit.tar.gz \
     && mv hugo /usr/local/bin/hugo 
-# Install Minify
-RUN curl -L https://bin.equinox.io/c/dhgbqpS8Bvy/minify-stable-linux-amd64.tgz | tar -xz \
-    && mv minify /usr/local/bin/ 
 # Create hugo User and Group
 RUN addgroup -Sg 1000 hugo \
     && adduser -SG hugo -u 1000 -h /src hugo
 
-HEALTHCHECK --timeout=3s CMD curl http://localhost:1313/ || exit 1
+HEALTHCHECK --timeout=3s CMD hugo env || exit 1
 
 WORKDIR /src
 
