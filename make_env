@@ -1,0 +1,3 @@
+VOLUMES = -v $(PWD)/orgdocs:/src
+PORTS = -p 1313:1313
+PORT = 1313
