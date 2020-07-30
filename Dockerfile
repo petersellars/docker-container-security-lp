@@ -1,6 +1,6 @@
 FROM alpine:3.12
 
-LABEL maintainer="Anshuman Purohit <apurohit@enoviti.com>"
+LABEL maintainer="Anshuman Purohit<apurohit@enoviti.com>"
 
 RUN apk add --no-cache \
     curl \

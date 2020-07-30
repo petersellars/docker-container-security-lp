@@ -17,15 +17,14 @@ clean:
 
 stop-clair:
 	@echo "Shutting down Clair server..."
-	-docker stop clair 
-	-docker stop clairdb 
+	-docker stop clair clairdb 
 	-docker network remove clairnet 
 	@echo "Finished shutting down Clair server!"
 	
 start-clair: 
 	@echo "Starting Clair server..."
 	@docker network create clairnet 
-	@docker run --network clairnet -d --rm --name clairdb  -e POSTGRES_PASSWORD=password postgres:9.6 
+	@docker run --network clairnet -d --rm --name clairdb  arminc/clair-db:`date +%Y-%m-%d` 
 	@sleep 5
 	@docker run --network clairnet -d --rm --name clair  -p 6060-6061:6060-6061 -v $(PWD)/clair_config:/config quay.io/coreos/clair:latest -config=/config/config.yaml
 	@echo "Clair Server is up!"
@@ -70,7 +69,14 @@ push:
 	@docker push $(NS)/$(IMAGE_NAME):$(VERSION)
 	@echo "Finished pushing docker image to Docker registry!"
 
-release: build
+scan:  
+	@echo "Scanning Hugo Builder for security vulnerabilities..."
+	@make start-clair
+	@./clair-scanner --ip 172.17.0.1 $(NS)/$(CONTAINER_NAME):$(VERSION)
+	@make stop-clair
+	@echo "Finished Scanning Hugo Builder for security vulnerabilities!"
+
+release: build scan
 	@make push -e VERSION=$(VERSION)
 
-.PHONY: clean stop-clair start-clair analyze build build-site start stop check-health push release
+.PHONY: clean scan stop-clair start-clair analyze build build-site start stop check-health push release
