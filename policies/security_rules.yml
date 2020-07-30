@@ -2,7 +2,8 @@
 profile:
   name: "Security Rules"
   description: "Set of rules focus on security aspects of Dockerfiles"
-
+  includes:
+      - custom_rules.yml
 line_rules:
 
   ADD:
@@ -46,6 +47,28 @@ line_rules:
         label: "installing_ssh"
         regex: /openssh-server/
         level: "warn"
-        message: "installing SSH in a container is not recommended"
+        message: "installing SSH in    a container is not recommended"
         description: "Do you really need SSH in this image?"
-        reference_url: "https://github.com/jpetazzo/nsenter"	
+        reference_url: "https://github.com/jpetazzo/nsenter"
+
+  USER:
+    paramSyntaxRegex: /^[a-z0-9_][a-z0-9_]{0,40}$/
+    rules:
+      -
+        label: "root_user"
+        regex: /root|0/
+        level: "error"
+        message: "Running as a root user"
+        description: "Containers should not run as root. Create a separate user instead."
+        reference_url:
+          - "https://medium.com/@mccode/processes-in-containers-should-not-run-as-root-2feae3f0df3b"
+      
+required_instructions: 
+  -
+      instruction: "USER"
+      count: 1
+      level: "warn"
+      message: "No 'USER' instruction in the file"
+      description: "If a USER command is not specified, the container may be running as the root user"
+      reference_url:
+        - "https://medium.com/@mccode/processes-in-containers-should-not-run-as-root-2feae3f0df3b"

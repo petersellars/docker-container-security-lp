@@ -1,6 +1,6 @@
 FROM alpine:3.12
 
-LABEL maintainer="apurohit@enoviti.com"
+LABEL maintainer="Anshuman Purohit <apurohit@enoviti.com>"
 
 RUN apk add --no-cache \
     curl \
@@ -21,6 +21,7 @@ RUN curl -L -o hugo_${VERSION}_Linux-64bit.tar.gz https://github.com/gohugoio/hu
 RUN addgroup -Sg 1000 hugo \
     && adduser -SG hugo -u 1000 -h /src hugo
 
+USER hugo
 HEALTHCHECK --timeout=3s CMD hugo env || exit 1
 
 WORKDIR /src

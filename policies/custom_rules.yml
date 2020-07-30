@@ -1,0 +1,60 @@
+  profile:
+    name: "Custom"
+    description: "Custom Profile. Checks basic syntax."
+    
+  line_rules:
+    FROM: 
+      paramSyntaxRegex: /^[\w./\-:]+(:[\w.]+)?(-[\w]+)?$/
+      rules: 
+        - 
+          label: "is_latest_tag"
+          regex: /latest/
+          level: "error"
+          message: "base image uses 'latest' tag"
+          description: "using the 'latest' tag may cause unpredictable builds. It is recommended that a specific tag is used in the FROM line or *-released which is the latest supported release."
+          reference_url: 
+            - "https://docs.docker.com/engine/reference/builder/"
+            - "#from"
+    LABEL:
+      paramSyntaxRegex: /.+/
+      defined_namevals:
+        maintainer:
+          valueRegex: /([\w]+)./
+          message: "Label 'maintainer' is missing or has invalid format" 
+          description: "The 'maintainer' label line is useful for identifying the author in the form : Joe Smith <joe.smith@example.com>"
+          level: "error"
+          required: true
+          reference_url:
+            - "http://docs.projectatomic.io/container-best-practices/#"
+            - "_recommended_labels_for_your_project"
+            
+    HEALTHCHECK:
+      paramSyntaxRegex: /.+/
+      defined_namevals:
+        maintainer:
+          valueRegex: /curl/
+          message: "Healthcheck uses curl" 
+          description: "HEALTHCHECK should not use the 'curl' or 'iwr'"
+          level: "error"
+          reference_url:
+            - "https://blog.sixeyed.com/docker-healthchecks-why-not-to-use-curl-or-iwr/"
+
+  required_instructions:
+  -
+    count: 1
+    description: "Labels are needed because...."
+    instruction: LABEL
+    level: error
+    message: "No LABELs are defined"
+    reference_url:
+      - "https://docs.docker.com/engine/reference/builder/"
+      - "#label"
+  - 
+      instruction: "HEALTHCHECK"
+      count: 1
+      level: "error"
+      message: "HEALTHCHECK is not defined"
+      description: "The HEALTHCHECK line is useful for monitoring if the application demon process is running properly in the container"
+      reference_url: 
+        - "https://docs.docker.com/engine/reference/builder/"
+        - "#healthcheck"
